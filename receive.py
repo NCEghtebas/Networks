@@ -41,7 +41,7 @@ def receive(duration=1/1000,pin=23):
             if (read_pulse[0] > 15 and read_pulse[0] <= 20):
                 #start reading sequence
                 am_reading = True
-            elif (read_pulse >= 30):
+            elif (read_pulse[0] >= 30):
                 #stop reading
                 am_reading = False
                 return pulses
