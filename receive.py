@@ -17,7 +17,7 @@ class Safeguards:
 def prepare_pin(pin=23):
     GPIO.setmode(GPIO.BCM)  #use Broadcom (BCM) GPIO numbers on breakout pcb
     
-    GPIO.setup(pin,GPIO.IN, ) # allow pi to read levels
+    GPIO.setup(pin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # allow pi to read levels
 
 def read_pin(pin):
     return GPIO.input(pin)  # set 3.3V level on GPIO output
@@ -25,8 +25,9 @@ def read_pin(pin):
 def delay(duration):            # sleep for duration seconds where duration is a float.
     time.sleep(duration)
         
-def receive(blinks=200,duration=.25,pin=23):
+def receive(duration=1/1000,pin=23):
     prepare_pin(pin)
+    ratio = 10
     
     for i in range(blinks):
         print("|{}".format("==" if read_pin(pin) else ""))
