@@ -12,7 +12,7 @@ class Safeguards:
 
 def prepare_pin(pin=17):
     GPIO.setmode(GPIO.BCM)  #use Broadcom (BCM) GPIO numbers on breakout pcb
-    
+
     GPIO.setup(pin,GPIO.OUT) # allow pi to set 3.3v and 0v levels
 
 def turn_high(pin=17):
@@ -22,9 +22,9 @@ def turn_low(pin=17):
     GPIO.output(pin,GPIO.LOW)   # set ground (0) level on GPIO output
 
 def delay(duration):            # sleep for duration seconds where duration is a float.
-    time.sleep(duration)  
+    time.sleep(duration)
 
-def transmit(pulses, duration=1/10, pin=17):
+def transmit(pulses, duration=1/100, pin=17):
     prepare_pin(pin)
     for pulse in pulses:
         if pulse[1]:

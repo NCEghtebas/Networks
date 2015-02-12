@@ -29,7 +29,7 @@ def delay(duration):            # sleep for duration seconds where duration is a
 def receive(duration=1/1000,pin=23):
     prepare_pin(pin)
     ratio = 10
-    # pulses = []
+    pulses = []
     am_reading = False
     count = 0
     last = 0
