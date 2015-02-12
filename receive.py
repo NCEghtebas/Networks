@@ -4,6 +4,7 @@
 import time
 import RPi.GPIO as GPIO
 from translator import *
+import math
 
 class Safeguards:
     def __enter__(self):
@@ -36,7 +37,7 @@ def receive(duration=1/1000,pin=23):
     while (True):
         current = read_pin(pin)
         if (current != last):
-            read_pulse = (Math.ceil(count/ratio), last)
+            read_pulse = (math.ceil(count/ratio), last)
             if (read_pulse[0] > 15 and read_pulse[0] <= 20):
                 #start reading sequence
                 am_reading = True
