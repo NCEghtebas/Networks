@@ -38,6 +38,7 @@ def receive(duration=1/1000,pin=23):
         current = read_pin(pin)
         if (current != last):
             read_pulse = (math.ceil(count/ratio), last)
+            print(read_pulse)
             if (read_pulse[0] > 15 and read_pulse[0] <= 20):
                 #start reading sequence
                 am_reading = True
