@@ -12,11 +12,11 @@ class Safeguards:
         GPIO.cleanup()
         print("Safe exit succeeded")
         return not any(rabc)
-    
+
 
 def prepare_pin(pin=23):
     GPIO.setmode(GPIO.BCM)  #use Broadcom (BCM) GPIO numbers on breakout pcb
-    
+
     GPIO.setup(pin,GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # allow pi to read levels
 
 def read_pin(pin):
@@ -24,19 +24,41 @@ def read_pin(pin):
 
 def delay(duration):            # sleep for duration seconds where duration is a float.
     time.sleep(duration)
-        
+
 def receive(duration=1/1000,pin=23):
     prepare_pin(pin)
     ratio = 10
-    
-    for i in range(blinks):
-        print("|{}".format("==" if read_pin(pin) else ""))
-        delay(duration)
-        
- 
+    pulses = []
+    am_reading = False
+    count = 0
+    last = 0
 
+    while (True):
+        current = read_pin(pin)
+        if (current != last):
+            read_pulse = (Math.ceil(count/ratio), last)
+            if (read_pulse[0] > 15 and read_pulse[0] <= 20):
+                #start reading sequence
+                am_reading = True
+            elif (read_pulse >= 30):
+                #stop reading
+                am_reading = False
+                return pulses
+            else:
+                if (am_reading):
+                    pulses.append(read_pulse)
+                    count = 0
+        else:
+            count += 1
+        last = current
+        delay(duration)
+
+def main():
+    stack = MorseBJStack()
+    pulses = receive()
+    decoded = stack.decode(pulses)
+    print("Decoded: {}".format(decoded))
 
 if __name__ == "__main__":
     with Safeguards():
-       receive()
-    
+       main()
