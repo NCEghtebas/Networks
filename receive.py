@@ -29,7 +29,7 @@ def delay(duration):            # sleep for duration seconds where duration is a
 def receive(duration=1/1000,pin=23):
     prepare_pin(pin)
     ratio = 10
-    pulses = []
+    # pulses = []
     am_reading = False
     count = 0
     last = 0
@@ -42,6 +42,7 @@ def receive(duration=1/1000,pin=23):
             if (read_pulse[0] > 15 and read_pulse[0] <= 20):
                 #start reading sequence
                 am_reading = True
+                pulses = []
             elif (read_pulse[0] >= 30):
                 #stop reading
                 am_reading = False
