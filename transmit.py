@@ -34,15 +34,23 @@ def transmit(pulses, duration=1/100, pin=17):
         delay(duration * pulse[0])
     turn_low(pin)
 
-def main():
+# def encode_payload(message):
+#     stack = MorseBJStack()
+#     encoded = [(20,1),(1,0)] + stack.encode(message) + [(40,1)]
+#     return encoded
+
+def encode(message):
     stack = MorseBJStack()
-    message = input('Enter Message: ')
+    encoded = stack.encode(message)
+    return encoded
 
-    encoded = [(20,1),(1,0)] + stack.encode(message) + [(40,1)]
+def main():
+    pass
+    # message = input('Enter Message: ')
 
-    print("{}".format(encoded))
+    # print("{}".format(encoded))
 
-    transmit(encoded)
+    # transmit(encoded)
 
 if __name__ == "__main__":
     with Safeguards():
