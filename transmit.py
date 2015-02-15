@@ -37,4 +37,4 @@ def transmit(pulses, duration=1/100, pin=17):
 def get(pulses):
     with Safeguards():
         transmit(pulses)
-        print("{}".format(encoded))
+        print("{}".format(pulses))

@@ -1,6 +1,6 @@
 from translator import *
 from constants import *
-from transmit import get
+import transmit
 
 def encode(message):
     stack = MorseBJStack()
@@ -8,7 +8,7 @@ def encode(message):
     return encoded
 
 def push(encoded_message):
-    get(encoded_message)
+    transmit.get(encoded_message)
 
 def get(ip_protocol, payload, destination):
     dest = encode(destination)
