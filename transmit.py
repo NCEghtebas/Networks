@@ -34,7 +34,7 @@ def transmit(pulses, duration=1/100, pin=17):
         delay(duration * pulse[0])
     turn_low(pin)
 
-def get(pulses):
+def get_from_datalink_layer(pulses):
     with Safeguards():
         transmit(pulses)
         print("{}".format(pulses))
