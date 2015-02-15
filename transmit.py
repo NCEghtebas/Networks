@@ -24,7 +24,7 @@ def turn_low(pin=17):
 def delay(duration):            # sleep for duration seconds where duration is a float.
     time.sleep(duration)
 
-def transmit(pulses, duration=1/100, pin=17):
+def transmit(pulses, duration=1/10, pin=17):
     prepare_pin(pin)
     for pulse in pulses:
         if pulse[1]:

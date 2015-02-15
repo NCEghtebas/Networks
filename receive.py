@@ -26,35 +26,40 @@ def read_pin(pin):
 def delay(duration):            # sleep for duration seconds where duration is a float.
     time.sleep(duration)
 
-def receive(duration=1/1000,pin=23):
+def receive(duration=1/100,pin=23):
     prepare_pin(pin)
     ratio = 10
     pulses = []
     am_reading = False
     count = 0
     last = 0
-
+    print(duration)
     while (True):
         current = read_pin(pin)
+        read_pulse = (math.ceil(count/ratio), last)
+
         if (current != last):
-            read_pulse = (math.ceil(count/ratio), last)
+            print(count)
             print(read_pulse)
-            if (read_pulse[0] > 10 and read_pulse[0] <= 20):
+            if (read_pulse[0] > 10 and read_pulse[0] <= 20 and read_pulse[1]):
                 #start reading sequence
+                print("BEGIN")
                 am_reading = True
                 pulses = []
-            elif (read_pulse[0] >= 30):
+            elif (read_pulse[0] >= 30 and read_pulse[1]):
                 #stop reading
                 am_reading = False
+                print(pulses)
                 return pulses
             else:
                 if (am_reading):
                     pulses.append(read_pulse)
-                    count = 0
+            count = 0
         else:
             count += 1
         last = current
         delay(duration)
+        #print("P " + str(read_pulse))
 
 def main():
     stack = MorseBJStack()
