@@ -4,7 +4,7 @@ from transmit import get
 
 def encode():
 	stack = MorseBJStack()
-	encoded = stack.encode(message)
+    encoded = stack.encode(message)
 	return encoded
 
 
