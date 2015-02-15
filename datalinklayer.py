@@ -2,7 +2,7 @@ from translator import *
 from constants import *
 from transmit import get
 
-def encode():
+def encode(message):
     stack = MorseBJStack()
     encoded = stack.encode(message)
     return encoded
