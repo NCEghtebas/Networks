@@ -7,7 +7,6 @@ class Safeguards:
         return self
     def __exit__(self,*rabc):
         GPIO.cleanup()
-        print("Safe exit succeeded")
         return not any(rabc)
 
 def prepare_pin(pin=17):
