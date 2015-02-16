@@ -5,7 +5,6 @@ import time
 import RPi.GPIO as GPIO
 from translator import *
 import math
-from datalinklayer import get_from_physical_layer
 
 class Safeguards:
     def __enter__(self):
@@ -39,7 +38,8 @@ def receive(duration=1/1000,pin=23):
         read_pulse = (math.ceil(count/ratio), last)
 
         if (current != last):
-            print(read_pulse)
+            #print here if you need to see the pulse
+            #print(read_pulse)
             if (read_pulse[0] > 10 and read_pulse[0] <= 20 and read_pulse[1]):
                 #start reading sequence
                 am_reading = True
@@ -58,18 +58,15 @@ def receive(duration=1/1000,pin=23):
             count += 1
         last = current
         delay(duration)
-        #print("P " + str(read_pulse))
 
 def push_up(pulses):
+    from datalinklayer import get_from_physical_layer
     get_from_physical_layer(pulses)
 
 def main():
     stack = MorseBJStack()
     pulses = receive()
     push_up(pulses)
-    
-    #decoded = stack.decode(pulses)
-    #print("Decoded: {}".format(decoded))
 
 if __name__ == "__main__":
     with Safeguards():
