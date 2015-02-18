@@ -3,3 +3,4 @@ __pycache__/constants.cpython-34.pyc
 __pycache__/translator.cpython-34.pyc
 __pycache__/transmit.cpython-34.pyc
 *.pyc
+constants.py
