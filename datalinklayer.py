@@ -1,5 +1,6 @@
 from translator import *
 from constants import *
+import binascii
 
 def find_sub_list(sl,l):
     results=[]
@@ -41,6 +42,8 @@ def decode_header(header, end_header_index):
             decoded_header["DESTINATION"] = d
         elif count == 2:
             decoded_header["IP_PROTOCOL"] = d
+        elif count == 3:
+            decoded_header["CHECKSUM"] = d
         count += 1
     return decoded_header
         
@@ -62,14 +65,26 @@ def decode_message(message):
     if (decoded_message["DESTINATION"] != mac):
         return decoded_message["DESTINATION"]
 
-    #Remove Source & Destination information from message
-    decoded_message.pop("SOURCE", None)
-    decoded_message.pop("DESTINATION", None)
+    # Remeber to check to checksum!
+    checksum = check_sum([decoded_message["SOURCE"], decoded_message["DESTINATION"]])
 
-    #decode payload
-    decoded_message["PAYLOAD"] = decode(payload)
-    
-    return decoded_message
+    if checksum == decoded_message["CHECKSUM"]:
+
+        #Remove Source & Destination information from message
+        decoded_message.pop("SOURCE", None)
+        decoded_message.pop("DESTINATION", None)
+        
+        decoded_message.pop("CHECKSUM", None)
+
+        #decode payload
+        decoded_message["PAYLOAD"] = decode(payload)
+        
+        return decoded_message
+
+    # If the checksum fails
+    else:
+        # Ask for retransmission
+        pass    
 
 def push_up(decoded_message):
     from iplayer import get_from_datalink_layer
@@ -79,32 +94,41 @@ def push_down(encoded_message):
     from transmit import get_from_datalink_layer
     get_from_datalink_layer(encoded_message)
 
-def check_sum(header)
-    # calculate sum of each 16 bit value within header (skip checksum field)
+def check_sum(header):
+    src = 0
+    dest = 0
+
+    # Convert header characters into ascii and sum
+    for char in header[0]:
+        src += ord(char)
+        
+    for char in header[1]:
+        dest += ord(char)
+
+    # Convert sum to binary    
+    binary = bin(src + dest)
     
-    # convert sum to binary
-
-    # add first 4 bits to value (carry)
-
-    # flip every bit in that value
-
-    return checksum
+    # Flip every bit
+    a = binary
+    b = bin(0)
+    for x in binary[2:]:
+        b = b + bin(int(x) ^ 0b1)
+    return b.replace('0b', '')[1:]
 
 def get_from_ip_layer(ip_protocol, payload, destination):
     dest = encode(destination)
     payload = encode(payload)
     ip_protocol = encode(ip_protocol)
+    
     src = encode(mac)
     sep = [(1,1), (1,0), (3,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     end_header = [(3,1), (1,0), (1,1), (1,0), (1,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     start = [(20,1),(1,0)]
     stop = [(40,1)]
-
-    header = [src, dest, ip_protocol]
-    checksum = check_sum(header)
+    checksum = encode(check_sum([mac, destination]))    
+    
     push_down(start + src + sep + dest + sep + \
               ip_protocol + sep + checksum + end_header + payload +  stop)
-
 
 def get_from_physical_layer(message):
     decoded = decode_message(message)
@@ -114,3 +138,6 @@ def get_from_physical_layer(message):
         print("REROUTE MESSAGE TO MAC ADDRESS: " + decoded)
     else:
         push_up(decoded)
+
+if __name__ == '__main__':
+    print(encode(check_sum(['C2', 'A2'])))
