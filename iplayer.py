@@ -1,6 +1,6 @@
 def push_down(message):
     from datalinklayer import get_from_ip_layer
-    get_from_ip_layer(encoded_message)
+    get_from_ip_layer(message)
 
 def get_from_datalink_layer(decoded_message):
     protocol = decoded_message["IP_PROTOCOL"]
