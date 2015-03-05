@@ -79,6 +79,17 @@ def push_down(encoded_message):
     from transmit import get_from_datalink_layer
     get_from_datalink_layer(encoded_message)
 
+def check_sum(header)
+    # calculate sum of each 16 bit value within header (skip checksum field)
+    
+    # convert sum to binary
+
+    # add first 4 bits to value (carry)
+
+    # flip every bit in that value
+
+    return checksum
+
 def get_from_ip_layer(ip_protocol, payload, destination):
     dest = encode(destination)
     payload = encode(payload)
@@ -88,7 +99,11 @@ def get_from_ip_layer(ip_protocol, payload, destination):
     end_header = [(3,1), (1,0), (1,1), (1,0), (1,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     start = [(20,1),(1,0)]
     stop = [(40,1)]
-    push_down(start + src + sep + dest + sep + ip_protocol + end_header + payload + stop)
+
+    header = [src, dest, ip_protocol]
+    checksum = check_sum(header)
+    push_down(start + src + sep + dest + sep + \
+              ip_protocol + sep + checksum + end_header + payload +  stop)
 
 
 def get_from_physical_layer(message):

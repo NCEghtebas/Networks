@@ -52,6 +52,8 @@ def receive(duration=1/1000,pin=23):
                 if (am_reading):
                     if (read_pulse[0] == 2 or read_pulse[0] == 6):
                         read_pulse = (read_pulse[0] + 1, last)
+                    elif (read_pulse[0] == 5):
+                        read_pulse = (read_pulse[0] - 1, last)
                     pulses.append(read_pulse)
             count = 0
         else:
