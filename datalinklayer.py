@@ -21,7 +21,8 @@ def decode(message):
     return encoded
 
 def decode_header(header, end_header_index):
-    sep = [(1,1), (1,0), (3,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
+    #sep = [(1,1), (1,0), (3,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
+    sep = [(7,1), (1,0)]
     sep_indices = find_sub_list(sep,header)
     header_items = []
     last = 0
@@ -67,6 +68,7 @@ def decode_message(message):
 
     #check if packet is for me or someone else
     #if for someone else, do nothing or reroute packet
+    print("DECODED: " + str(decoded_message))
     if (decoded_message["DESTINATION_HOST"] != "1"): #CHANGE TO IP
         return decoded_message["DESTINATION_HOST"]
 
@@ -93,26 +95,29 @@ def push_down(encoded_message):
 def get_from_ip_layer(message):
     #encode the entire message
     src_lan = "A"
-    src_host = '1' #should actually be pulled from router
+    src_host = "1" #should actually be pulled from router
 
     message['SOURCE_LAN'] = encode(src_lan)
     message['SOURCE_HOST'] = encode(src_host)
     message["DESTINATION_LAN"] = encode(message["DESTINATION_LAN"])
     message["DESTINATION_HOST"] = encode(message["DESTINATION_HOST"])
     message["IP_PROTOCOL"] = encode(message["IP_PROTOCOL"])
-    message['CHECKSUM'] = encode("CHECK") #replace with checksum function
+    message['CHECKSUM'] = encode("C") #replace with checksum function
     message["PAYLOAD"] = encode(message["PAYLOAD"])
 
     #start|stop code for msg and header
-    sep = [(1,1), (1,0), (3,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
+    #sep = [(1,1), (1,0), (3,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
+    sep = [(7,1), (1,0)]
     end_header = [(3,1), (1,0), (1,1), (1,0), (1,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     start = [(20,1),(1,0)]
     stop = [(40,1)]
+    #print("HEADER: " + str(message))
 
     push_down(start + message['SOURCE_LAN'] + sep + message['SOURCE_HOST'] + sep + message["DESTINATION_LAN"] + sep + message["DESTINATION_HOST"] + sep + message["IP_PROTOCOL"] + sep + message['CHECKSUM'] + end_header + message["PAYLOAD"] + stop)
 
 
 def get_from_physical_layer(message):
+    print("PULSES: " + str(message))
     decoded = decode_message(message)
     decoded_len = len(decoded)
     mac_address_len = 1
