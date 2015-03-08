@@ -10,17 +10,18 @@ def get_from_datalink_layer(decoded_message):
 
 def main():
     destination = input('Destination: ')
-    payload = input('Input Message: ')
-    ip_protocol = "A"
     while (len(destination) != 2):
         print("ERROR: DESTINATION MUST BE 2 CHARS")
         destination = input('Destination: ')
+    payload = input('Input Message: ')
+    ip_protocol = "A"
 
     message = {}
     message["PAYLOAD"] = payload
     message["IP_PROTOCOL"] = ip_protocol
     message["DESTINATION_LAN"] = destination[0]
     message["DESTINATION_HOST"] = destination[1]
+    print("MSG: " + str(message))
 
     push_down(message)
 
