@@ -57,14 +57,14 @@ def receive(duration=1/1000,pin=23):
         last = current
         delay(duration)
 
-##def push_up(pulses):
-##    from datalinklayer import get_from_physical_layer
-##    get_from_physical_layer(pulses)
+def push_up(pulses):
+    from datalinklayer import get_from_physical_layer
+    get_from_physical_layer(pulses)
 
 def main():
     stack = MorseBJStack()
     pulses = receive()
-    #push_up(pulses)
+    push_up(pulses)
 
 if __name__ == "__main__":
     with Safeguards():
