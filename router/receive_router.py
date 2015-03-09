@@ -60,10 +60,12 @@ def receive(duration=1/1000,pin=23):
         last = current
         delay(duration)
 
-def route (message):
+def route_to_pi (message):
+    from transmit_router import transmit
+    
     print("PULSES: " + str(message))
     decoded = decode_message(message)
-    #push_up(decoded) # RENAME
+    transmit(decoded)
 
 # Decoding
 

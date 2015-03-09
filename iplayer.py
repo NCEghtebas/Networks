@@ -1,3 +1,5 @@
+import json
+
 def push_down(message):
     from datalinklayer import get_from_ip_layer
     get_from_ip_layer(message)
@@ -9,12 +11,28 @@ def get_from_datalink_layer(decoded_message):
     print(statement)
 
 def main():
+    ip = open('ip.txt', 'r+')
+    try:
+        ip = json.loads(ip)
+        
+    except:
+        print('Obtain IP.')
+        
+        # Request to Router for IP Address
+        ip_protocol = "C"
+        message = {}
+        message["PAYLOAD"] = ' '
+        message["IP_PROTOCOL"] = ip_protocol
+        message["DESTINATION_LAN"] = "A"
+        message["DESTINATION_HOST"] = "0"
+        push_down(message)
+
+    ip_protocol = "A"
     destination = input('Destination: ')
     while (len(destination) != 2):
         print("ERROR: DESTINATION MUST BE 2 CHARS")
         destination = input('Destination: ')
     payload = input('Input Message: ')
-    ip_protocol = "A"
 
     message = {}
     message["PAYLOAD"] = payload
@@ -26,4 +44,4 @@ def main():
     push_down(message)
 
 if __name__ == "__main__":
-	main()
+    main()
