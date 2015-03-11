@@ -1,5 +1,6 @@
 from translator import *
 from constants import *
+import json
 
 def find_sub_list(sl,l):
     results=[]
@@ -21,7 +22,6 @@ def decode(message):
     return encoded
 
 def decode_header(header, end_header_index):
-    #sep = [(1,1), (1,0), (3,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     sep = [(7,1), (1,0)]
     sep_indices = find_sub_list(sep,header)
     header_items = []
@@ -73,8 +73,6 @@ def decode_message(message):
     #check if packet is for me or someone else
     #if for someone else, do nothing or reroute packet
     print("DECODED: " + str(decoded_message))
-    if (decoded_message["DESTINATION_HOST"] != "1"): #CHANGE TO ASSIGNED IP
-        return decoded_message["DESTINATION_HOST"]
     
     if (decoded_message['DESTINATION_MAC'] != mac):
         return decoded_message['DESTINATION_MAC']
@@ -105,7 +103,13 @@ def get_from_ip_layer(message):
     #encode the entire message
     mac_address = mac
     src_lan = "A"
-    src_host = "1" #should actually be pulled from router
+    #src_host = "1" #should actually be pulled from router
+
+    if message['IP_PROTOCOL'] == 'C':
+        src_host = ''
+    else:
+        ip = json.loads(open('ip.txt', 'r+'))
+        src_host = ip['IP']
 
     message['SOURCE_MAC'] = encode(mac_address)
     message['DESTINATION_MAC'] = 'R' #hard-coded router mac
@@ -118,22 +122,26 @@ def get_from_ip_layer(message):
     message["PAYLOAD"] = encode(message["PAYLOAD"])
 
     #start|stop code for msg and header
-    #sep = [(1,1), (1,0), (3,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     sep = [(7,1), (1,0)]
     end_header = [(3,1), (1,0), (1,1), (1,0), (1,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     start = [(20,1),(1,0)]
     stop = [(40,1)]
-    #print("HEADER: " + str(message))
 
     push_down(start + message['SOURCE_MAC'] + sep + message['DESTINATION_MAC'] + sep + message['SOURCE_LAN'] + sep + message['SOURCE_HOST'] + sep + message["DESTINATION_LAN"] + sep + message["DESTINATION_HOST"] + sep + message["IP_PROTOCOL"] + sep + message['CHECKSUM'] + end_header + message["PAYLOAD"] + stop)
 
 
 def get_from_physical_layer(message):
     print("PULSES: " + str(message))
+
+    # Check if MAC is mine
     decoded = decode_message(message)
     decoded_len = len(decoded)
     mac_address_len = 1
     if decoded_len == mac_address_len:
         print("REROUTE MESSAGE TO IP ADDRESS: " + decoded)
     else:
-        push_up(decoded)
+        if decoded['IP_PROTOCOL'] == 'C':
+            ip = decoded['DESTINATION_HOST']
+            json.dump({'IP': ip}, 'ip.txt')
+        else:
+            push_up(decoded)
