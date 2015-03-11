@@ -37,18 +37,22 @@ def decode_header(header, end_header_index):
     for item in header_items:
         d = decode(item)
         if count == 0:
-            decoded_header["SOURCE_LAN"] = d
+            decoded_header["SOURCE_MAC"] = d
         elif count == 1:
-            decoded_header["SOURCE_HOST"] = d
+            decoded_header["DESTINATION_MAC"] = d
         elif count == 2:
-            decoded_header["DESTINATION_LAN"] = d
+            decoded_header["SOURCE_LAN"] = d
         elif count == 3:
-            decoded_header["DESTINATION_HOST"] = d
+            decoded_header["SOURCE_HOST"] = d
         elif count == 4:
-            decoded_header["IP_PROTOCOL"] = d
+            decoded_header["DESTINATION_LAN"] = d
         elif count == 5:
-            decoded_header["CHECKSUM"] = d
+            decoded_header["DESTINATION_HOST"] = d
         elif count == 6:
+            decoded_header["IP_PROTOCOL"] = d
+        elif count == 7:
+            decoded_header["CHECKSUM"] = d
+        elif count == 8:
             decoded_header["PAYLOAD"] = d
         count += 1
     return decoded_header
@@ -69,10 +73,15 @@ def decode_message(message):
     #check if packet is for me or someone else
     #if for someone else, do nothing or reroute packet
     print("DECODED: " + str(decoded_message))
-    if (decoded_message["DESTINATION_HOST"] != "1"): #CHANGE TO IP
+    if (decoded_message["DESTINATION_HOST"] != "1"): #CHANGE TO ASSIGNED IP
         return decoded_message["DESTINATION_HOST"]
+    
+    if (decoded_message['DESTINATION_MAC'] != mac):
+        return decoded_message['DESTINATION_MAC']
 
     #Remove Source & Destination information from message
+    decoded_message.pop("SOURCE_MAC", None)
+    decoded_message.pop("DESTINATION_MAC", None)
     decoded_message.pop("SOURCE_LAN", None)
     decoded_message.pop("SOURCE_HOST", None)
     decoded_message.pop("DESTINATION_LAN", None)
@@ -94,9 +103,12 @@ def push_down(encoded_message):
 
 def get_from_ip_layer(message):
     #encode the entire message
+    mac_address = mac
     src_lan = "A"
     src_host = "1" #should actually be pulled from router
 
+    message['SOURCE_MAC'] = encode(mac_address)
+    message['DESTINATION_MAC'] = 'R' #hard-coded router mac
     message['SOURCE_LAN'] = encode(src_lan)
     message['SOURCE_HOST'] = encode(src_host)
     message["DESTINATION_LAN"] = encode(message["DESTINATION_LAN"])
@@ -113,7 +125,7 @@ def get_from_ip_layer(message):
     stop = [(40,1)]
     #print("HEADER: " + str(message))
 
-    push_down(start + message['SOURCE_LAN'] + sep + message['SOURCE_HOST'] + sep + message["DESTINATION_LAN"] + sep + message["DESTINATION_HOST"] + sep + message["IP_PROTOCOL"] + sep + message['CHECKSUM'] + end_header + message["PAYLOAD"] + stop)
+    push_down(start + message['SOURCE_MAC'] + sep + message['DESTINATION_MAC'] + sep + message['SOURCE_LAN'] + sep + message['SOURCE_HOST'] + sep + message["DESTINATION_LAN"] + sep + message["DESTINATION_HOST"] + sep + message["IP_PROTOCOL"] + sep + message['CHECKSUM'] + end_header + message["PAYLOAD"] + stop)
 
 
 def get_from_physical_layer(message):
