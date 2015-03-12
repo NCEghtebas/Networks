@@ -23,7 +23,7 @@ def decode(message):
 
 def encode_message_dict(message):
     message['SOURCE_MAC'] = encode(mac_address)
-    message['DESTINATION_MAC'] = 'R' #hard-coded router mac
+    message['DESTINATION_MAC'] = encode('R') #hard-coded router mac
     message['SOURCE_LAN'] = encode(src_lan)
     message['SOURCE_HOST'] = encode(src_host)
     message["DESTINATION_LAN"] = encode(message["DESTINATION_LAN"])
@@ -131,7 +131,7 @@ def get_from_ip_layer(message):
         src_host = ip['IP']
 
     message['SOURCE_MAC'] = encode(mac_address)
-    message['DESTINATION_MAC'] = 'R' #hard-coded router mac
+    message['DESTINATION_MAC'] = encode('R') #hard-coded router mac
     message['SOURCE_LAN'] = encode(src_lan)
     message['SOURCE_HOST'] = encode(src_host)
     message["DESTINATION_LAN"] = encode(message["DESTINATION_LAN"])
