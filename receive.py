@@ -64,7 +64,10 @@ def push_up(pulses):
 def main():
     stack = MorseBJStack()
     pulses = receive()
-    push_up(pulses)
+    from threading import Thread
+    listen_thread = Thread(target=self.push_up, args=(pulses))
+    listen_thread.start()
+    #push_up(pulses)
 
 if __name__ == "__main__":
     with Safeguards():

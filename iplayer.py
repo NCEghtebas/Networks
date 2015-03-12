@@ -14,17 +14,16 @@ def main():
     ip = open('ip.txt', 'r+')
     try:
         ip = json.loads(ip)
-        
     except:
         print('Obtain IP.')
-        
+
         # Request to Router for IP Address
         ip_protocol = "C"
         message = {}
         message["PAYLOAD"] = ' '
         message["IP_PROTOCOL"] = ip_protocol
         message["DESTINATION_LAN"] = "A"
-        message["DESTINATION_HOST"] = "0"
+        message["DESTINATION_HOST"] = "1"
         push_down(message)
 
     ip_protocol = "A"

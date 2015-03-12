@@ -21,6 +21,25 @@ def decode(message):
     encoded = stack.decode(message)
     return encoded
 
+def encode_message_dict(message):
+    message['SOURCE_MAC'] = encode(mac_address)
+    message['DESTINATION_MAC'] = 'R' #hard-coded router mac
+    message['SOURCE_LAN'] = encode(src_lan)
+    message['SOURCE_HOST'] = encode(src_host)
+    message["DESTINATION_LAN"] = encode(message["DESTINATION_LAN"])
+    message["DESTINATION_HOST"] = encode(message["DESTINATION_HOST"])
+    message["IP_PROTOCOL"] = encode(message["IP_PROTOCOL"])
+    message['CHECKSUM'] = encode("C") #replace with checksum function
+    message["PAYLOAD"] = encode(message["PAYLOAD"])
+
+    sep = [(7,1), (1,0)]
+    end_header = [(3,1), (1,0), (1,1), (1,0), (1,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
+    start = [(20,1),(1,0)]
+    stop = [(40,1)]
+
+    return start + message['SOURCE_MAC'] + sep + message['DESTINATION_MAC'] + sep + message['SOURCE_LAN'] + sep + message['SOURCE_HOST'] + sep + message["DESTINATION_LAN"] + sep + message["DESTINATION_HOST"] + sep + message["IP_PROTOCOL"] + sep + message['CHECKSUM'] + end_header + message["PAYLOAD"] + stop
+
+
 def decode_header(header, end_header_index):
     sep = [(7,1), (1,0)]
     sep_indices = find_sub_list(sep,header)
@@ -73,7 +92,7 @@ def decode_message(message):
     #check if packet is for me or someone else
     #if for someone else, do nothing or reroute packet
     print("DECODED: " + str(decoded_message))
-    
+
     if (decoded_message['DESTINATION_MAC'] != mac):
         return decoded_message['DESTINATION_MAC']
 
@@ -140,8 +159,60 @@ def get_from_physical_layer(message):
     if decoded_len == mac_address_len:
         print("REROUTE MESSAGE TO IP ADDRESS: " + decoded)
     else:
-        if decoded['IP_PROTOCOL'] == 'C':
-            ip = decoded['DESTINATION_HOST']
-            json.dump({'IP': ip}, 'ip.txt')
+        if decoded['DESTINATION_MAC'] == 'R': #this Pi is a Router
+          if decoded['IP_PROTOCOL'] == 'C' and decoded['SOURCE_HOST'] == '': #this is an IP Message
+            #Pi is requesting for an IP, let's give him one
+            ip_tables = open('ip_tables.txt', 'r+')
+            try:
+                ip = json.loads(ip_tables)
+            except:
+                #insert router IP first
+                router_ip = {'1': 'R'}
+                json.dump(router_ip, 'ip_tables.txt')
+                json.dump({'IP': 1}, 'ip.txt')
+
+            ip_tables = open('ip_tables.txt', 'r+')
+            ips = json.loads(ip_tables)
+            ip_count = len(ips)
+            assigned_ip = ip_count + 1
+            ips[str(assigned_ip)] = decoded['SOURCE_MAC']
+            json.dump(ips, 'ip_tables.txt')
+
+            #send packet back to Pi
+            decoded['DESTINATION_HOST'] = assigned_ip
+            decoded['SOURCE_HOST'] = 1
+            decoded['DESTINATION_MAC'] = decoded['SOURCE_MAC']
+            decoded['SOURCE_MAC'] = mac
+
+            #encode message
+            encoded = encode_message_dict(decoded)
+            push_down(encoded)
+          else: #this is a packet that must be rerouted
+
+            #Get IP based on MAC
+            ip_tables = open('ip_tables.txt', 'r+')
+            try:
+                ip = json.loads(ip_tables)
+            except:
+                #insert router IP first
+                router_ip = {'1': 'R'}
+                json.dump(router_ip, 'ip_tables.txt')
+                json.dump({'IP': 1}, 'ip.txt')
+
+            ip_tables = open('ip_tables.txt', 'r+')
+            ips = json.loads(ip_tables)
+
+            try:
+              mac = ips[decoded['DESTINATION_HOST']]
+              decoded['DESTINATION_MAC'] = mac
+              encoded = encode_message_dict(decoded)
+              push_down(encoded)
+            except:
+              #reroute to outside lan
+              print('MESSAGE IS FOR OUTSIDE LAN')
         else:
-            push_up(decoded)
+          if decoded['IP_PROTOCOL'] == 'C':
+              ip = decoded['DESTINATION_HOST']
+              json.dump({'IP': ip}, 'ip.txt')
+          else:
+              push_up(decoded)
