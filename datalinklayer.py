@@ -55,6 +55,7 @@ def decode_header(header, end_header_index):
     count = 0
     for item in header_items:
         d = decode(item)
+        print(d)
         if count == 0:
             decoded_header["SOURCE_MAC"] = d
         elif count == 1:
@@ -80,6 +81,7 @@ def decode_message(message):
     #Declare End Header Sequence
     end_header = [(3,1), (1,0), (1,1), (1,0), (1,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
     end_header_indices = find_sub_list(end_header,message)
+    print(end_header_indices)
     end_header_indices = end_header_indices[0]
 
     #Split message according to header and payload
@@ -125,7 +127,7 @@ def get_from_ip_layer(message):
     #src_host = "1" #should actually be pulled from router
 
     if message['IP_PROTOCOL'] == 'C':
-        src_host = ''
+        src_host = ' '
     else:
         ip = json.loads(open('ip.txt', 'r+'))
         src_host = ip['IP']
@@ -150,7 +152,7 @@ def get_from_ip_layer(message):
 
 
 def get_from_physical_layer(message):
-    print("PULSES: " + str(message))
+    #print("PULSES: " + str(message))
 
     # Check if MAC is mine
     decoded = decode_message(message)
@@ -163,20 +165,24 @@ def get_from_physical_layer(message):
           if decoded['IP_PROTOCOL'] == 'C' and decoded['SOURCE_HOST'] == '': #this is an IP Message
             #Pi is requesting for an IP, let's give him one
             ip_tables = open('ip_tables.txt', 'r+')
+            ip = open('ip.txt', 'r+')
+
             try:
-                ip = json.loads(ip_tables)
+                json.loads(ip_tables)
+                print('Something in IP Tables')
             except:
                 #insert router IP first
                 router_ip = {'1': 'R'}
-                json.dump(router_ip, 'ip_tables.txt')
-                json.dump({'IP': 1}, 'ip.txt')
+                print('Dumping Router IP: ', router_ip)
+                json.dump(router_ip, ip_tables)
+                json.dump({'IP': 1}, ip)
 
             ip_tables = open('ip_tables.txt', 'r+')
             ips = json.loads(ip_tables)
             ip_count = len(ips)
             assigned_ip = ip_count + 1
             ips[str(assigned_ip)] = decoded['SOURCE_MAC']
-            json.dump(ips, 'ip_tables.txt')
+            json.dump(ips, ip_tables)
 
             #send packet back to Pi
             decoded['DESTINATION_HOST'] = assigned_ip
@@ -213,6 +219,6 @@ def get_from_physical_layer(message):
         else:
           if decoded['IP_PROTOCOL'] == 'C':
               ip = decoded['DESTINATION_HOST']
-              json.dump({'IP': ip}, 'ip.txt')
+              json.dump({'IP': ip}, open('ip.txt','r+'))
           else:
               push_up(decoded)

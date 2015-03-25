@@ -60,14 +60,15 @@ def receive(duration=1/1000,pin=23):
 def push_up(pulses):
     from datalinklayer import get_from_physical_layer
     get_from_physical_layer(pulses)
+    
 
 def main():
     stack = MorseBJStack()
     pulses = receive()
-    from threading import Thread
-    listen_thread = Thread(target=self.push_up, args=(pulses))
-    listen_thread.start()
-    #push_up(pulses)
+    #from threading import Thread
+    #listen_thread = Thread(target=push_up, args=(pulses))
+    #listen_thread.start()
+    push_up(pulses)
 
 if __name__ == "__main__":
     with Safeguards():
