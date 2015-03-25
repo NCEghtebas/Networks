@@ -79,7 +79,7 @@ def decode_header(header, end_header_index):
 
 def decode_message(message):
     #Declare End Header Sequence
-    end_header = [(3,1), (1,0), (1,1), (1,0), (1,1), (1,0), (1,1), (1,0), (3,1), (1,0)]
+    end_header = [(10,1), (1,0)]
     end_header_indices = find_sub_list(end_header,message)
     end_header_indices = end_header_indices[0]
 
